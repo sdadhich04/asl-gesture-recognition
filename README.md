@@ -22,7 +22,7 @@ The system detects significant motion via the accelerometer, then captures 119 s
 1. **Data collection** — IMU data recorded as CSV files (`hi.csv`, `sup.csv`) using the Nano 33 BLE Sense
 2. **Model training** — Dense neural network trained on 119-sample × 6-feature windows in TensorFlow
 3. **TFLite conversion** — Model converted to TensorFlow Lite and quantized for microcontroller deployment
-4. **Model compression** — TFLite Micro model compressed and exported as `model.h` C array
+4. **Model export** — TFLite model exported as `model.h` C array for Arduino
 5. **Arduino deployment** — Sketch loads `model.h`, waits for motion trigger, runs inference, prints results over Serial
 
 ---
@@ -40,38 +40,49 @@ The system detects significant motion via the accelerometer, then captures 119 s
 ## Repository contents
 
 ```
-EE446_TinyML_Lab9.ipynb              ← Full pipeline: data loading → training → TFLite conversion → compression
+EE446_TinyML_Lab9.ipynb              ← Full pipeline: data loading → training → TFLite conversion → export
 TinyML-Lab9.pdf                      ← Lab instructions
 data/
   hi.csv                             ← IMU recordings for "hi" gesture
   sup.csv                            ← IMU recordings for "sup" gesture
 model/
   gesture_model.tflite               ← Trained TFLite model (148 KB)
-  model.h                            ← Model as C array for Arduino (915 KB)
 arduino/
   lab9-classifier-dual-board.ino     ← Arduino sketch (supports Rev1 and Rev2 boards)
+  model.h                            ← Model as C array (must be in same folder as sketch)
 ```
 
 ---
 
-## Hardware setup
+## Quick start
 
-- **Arduino Nano 33 BLE Sense** (Rev1 or Rev2)
-- Set `#define USE_NANO_33_BLE_REV2_IMU 1` in the sketch for Rev2, `0` for Rev1
-- Upload via Arduino IDE with `TensorFlowLite` library installed
-- Open Serial Monitor at 9600 baud — gesture probabilities print after each detected motion
-
----
-
-## Dependencies
-
-**Python (notebook):** `numpy`, `pandas`, `matplotlib`, `tensorflow`, `scikit-learn`
+### Run the notebook (train / retrain)
 
 ```bash
 pip install numpy pandas matplotlib tensorflow scikit-learn
+jupyter notebook EE446_TinyML_Lab9.ipynb
 ```
 
-**Arduino:** `TensorFlowLite` library, `Arduino_BMI270_BMM150` (Rev2) or `Arduino_LSM9DS1` (Rev1)
+The notebook loads `data/hi.csv` and `data/sup.csv`, trains a dense network, converts to TFLite, and saves the output as `model.h`. Copy the generated `model.h` into the `arduino/` folder before uploading to the board.
+
+### Flash the Arduino sketch
+
+1. Install Arduino libraries: `TensorFlowLite`, plus `Arduino_BMI270_BMM150` (Rev2) or `Arduino_LSM9DS1` (Rev1)
+2. Open `arduino/lab9-classifier-dual-board.ino` in Arduino IDE
+3. Set the board flag at the top of the sketch:
+   ```cpp
+   #define USE_NANO_33_BLE_REV2_IMU 1  // 1 = Rev2 (BMI270), 0 = Rev1 (LSM9DS1)
+   ```
+4. Select **Arduino Nano 33 BLE** (or BLE Sense) as the board, upload
+5. Open **Serial Monitor at 9600 baud** — after each detected motion, the sketch prints softmax probabilities for each gesture
+
+> **Note:** `arduino/model.h` is required to compile the sketch. If you regenerate the model in the notebook, copy the new `model.h` into the `arduino/` folder before re-uploading.
+
+---
+
+## Hardware
+
+- **Arduino Nano 33 BLE Sense** (Nordic nRF52840, 256 KB flash, 64 KB RAM, onboard IMU)
 
 ---
 
