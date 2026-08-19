@@ -21,7 +21,7 @@ The system detects significant motion via the accelerometer, then captures 119 s
 
 1. **Data collection** — IMU data recorded as CSV files (`hi.csv`, `sup.csv`) using the Nano 33 BLE Sense
 2. **Model training** — Dense neural network trained on 119-sample × 6-feature windows in TensorFlow
-3. **TFLite conversion** — Model converted to TensorFlow Lite and quantized for microcontroller deployment
+3. **TFLite conversion** — Model converted to TensorFlow Lite (float32 — the notebook does not apply post-training quantization; the Arduino sketch runs float32 inference directly)
 4. **Model export** — TFLite model exported as `model.h` C array for Arduino
 5. **Arduino deployment** — Sketch loads `model.h`, waits for motion trigger, runs inference, prints results over Serial
 
@@ -82,10 +82,16 @@ The notebook loads `data/hi.csv` and `data/sup.csv`, trains a dense network, con
 
 ## Hardware
 
-- **Arduino Nano 33 BLE Sense** (Nordic nRF52840, 256 KB flash, 64 KB RAM, onboard IMU)
+- **Arduino Nano 33 BLE Sense** (Nordic nRF52840, 1 MB flash, 256 KB RAM, onboard IMU)
 
 ---
 
 ## Authors
 
 Sparsh Dadhich — University of Washington, ECE / Neuroscience
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE). This covers the author's own code, notebooks, and documentation in this repo.
